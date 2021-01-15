@@ -47,11 +47,18 @@ impl HelmClient {
         name: &str,
         chart: &str,
         version: Option<&str>,
-        opts: &[(&str, &str)],
+        opts: &[(&str, &str, bool)],
     ) -> Result<(), HelmError> {
         let sets: Vec<_> = opts
             .iter()
-            .flat_map(|(key, val)| vec!["--set".to_string(), format!("{}={}", key, val)])
+            .flat_map(|(key, val, is_string)| {
+                let flag = if *is_string {
+                    "--set-string"
+                } else {
+                    "--set"
+                };
+                vec![flag.to_owned(), format!("{}={}", key, val)]
+            })
             .collect();
 
         let mut command = Command::new("helm");
